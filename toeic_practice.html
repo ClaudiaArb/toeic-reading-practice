@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Reading Practice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --border: #ddd;
+        }
+
+        body.dark-mode {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2c2c2c;
+            --text-primary: #ecf0f1;
+            --text-secondary: #bdc3c7;
+            --border: #444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+
+        .main-content {
+            background: var(--bg-primary);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 28px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .mode-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+        }
+
+        .mode-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .timer {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .reading-text {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .reading-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .questions {
+            margin-top: 30px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+        }
+
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-primary);
+        }
+
+        .option:hover {
+            border-color: var(--accent);
+            background: var(--bg-secondary);
+        }
+
+        .option.selected {
+            border-color: var(--accent);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .option.incorrect {
+            border-color: var(--error);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid var(--accent);
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .vocabulary-section {
+            margin-top: 20px;
+        }
+
+        .vocabulary-section h3 {
+            margin-bottom: 15px;
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .vocab-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .vocab-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .vocab-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .vocab-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+        }
+
+        .vocab-word {
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: var(--error);
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .theme-toggle {
+            background: var(--text-secondary);
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-overview {
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-overview h3 {
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <header>
+                <h1>📚 TOEIC Reading Practice</h1>
+                <div class="controls">
+                    <button class="theme-toggle" onclick="toggleTheme()">🌙 Modo Oscuro</button>
+                </div>
+            </header>
+
+            <div class="mode-selector">
+                <label>Modo de práctica:</label>
+                <select id="modeSelect" onchange="changeMode()">
+                    <option value="skimming">Skimming (Idea principal)</option>
+                    <option value="scanning">Scanning (Datos específicos)</option>
+                </select>
+            </div>
+
+            <div class="progress-overview">
+                <h3>Tu Progreso</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Textos completados:</span>
+                    <span class="stat-value" id="totalCompleted">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Promedio de aciertos:</span>
+                    <span class="stat-value" id="avgAccuracy">0%</span>
+                </div>
+            </div>
+
+            <div class="timer" id="timer">00:00</div>
+
+            <div class="action-buttons">
+                <button id="startBtn" onclick="startReading()">▶️ Iniciar Lectura</button>
+                <button id="stopBtn" onclick="stopReading()" disabled>⏹️ Terminar Lectura</button>
+                <button id="submitBtn" onclick="submitAnswers()" class="hidden">✓ Enviar Respuestas</button>
+                <button onclick="newReading()">🔄 Nueva Lectura</button>
+            </div>
+
+            <div class="reading-text" id="readingText">
+                <div class="reading-title" id="readingTitle"></div>
+                <div id="readingContent"></div>
+            </div>
+
+            <div class="questions hidden" id="questionsSection"></div>
+
+            <div class="stats hidden" id="statsSection">
+                <h3>📊 Resultados</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Tiempo de lectura:</span>
+                    <span class="stat-value" id="readingTime">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Velocidad:</span>
+                    <span class="stat-value" id="readingSpeed">-</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Aciertos:</span>
+                    <span class="stat-value" id="accuracy">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="vocabulary-section">
+                <h3>📖 Mi Glosario</h3>
+                <div class="vocab-input-group">
+                    <input type="text" class="vocab-input" id="vocabInput" placeholder="Nueva palabra...">
+                    <button onclick="addVocabulary()">+</button>
+                </div>
+                <div class="vocab-list" id="vocabList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const readings = {
+            skimming: [
+                {
+                    title: "Company Merger Announcement",
+                    text: "TechVision Inc. is pleased to announce its merger with DataCore Solutions, effective January 15th. This strategic partnership will combine TechVision's innovative software solutions with DataCore's extensive database management expertise. The merger aims to create a comprehensive technology platform that will better serve our clients' evolving needs. Both companies share a commitment to excellence and customer satisfaction. Employees from both organizations will be integrated over the next six months, and no layoffs are anticipated. The combined entity will operate under the name TechVision DataCore, with headquarters remaining in Seattle. Clients can expect enhanced services and expanded product offerings as we move forward together.",
+                    questions: [
+                        {
+                            question: "What is the main purpose of this announcement?",
+                            options: [
+                                "A) To announce a company closure",
+                                "B) To inform about a merger between two companies",
+                                "C) To advertise new products",
+                                "D) To announce employee layoffs"
+                            ],
+                            correct: 1,
+                            explanation: "El propósito principal es anunciar la fusión entre TechVision Inc. y DataCore Solutions."
+                        },
+                        {
+                            question: "What is the overall tone of the announcement?",
+                            options: [
+                                "A) Pessimistic and worried",
+                                "B) Neutral and informative",
+                                "C) Positive and optimistic",
+                                "D) Critical and negative"
+                            ],
+                            correct: 2,
+                            explanation: "El tono es positivo y optimista, destacando beneficios y sin mencionar aspectos negativos."
+                        },
+                        {
+                            question: "What can clients expect from this merger?",
+                            options: [
+                                "A) Higher prices",
+                                "B) Reduced services",
+                                "C) Enhanced services and expanded offerings",
+                                "D) Service interruptions"
+                            ],
+                            correct: 2,
+                            explanation: "El texto indica que los clientes pueden esperar servicios mejorados y ofertas ampliadas."
+                        }
+                    ]
+                },
+                {
+                    title: "Employee Benefits Update",
+                    text: "Dear Staff, We are excited to announce significant improvements to our employee benefits package, effective next month. After carefully reviewing employee feedback, we have decided to enhance our healthcare coverage, adding dental and vision plans at no additional cost. Additionally, we are introducing flexible working hours to promote better work-life balance. Employees will now be able to choose their start time between 7 AM and 10 AM. Our professional development budget has also been increased by 30%, allowing more opportunities for training and certifications. These changes reflect our commitment to creating a supportive and rewarding workplace. Further details will be shared in next week's town hall meeting.",
+                    questions: [
+                        {
+                            question: "What is the main idea of this message?",
+                            options: [
+                                "A) Announcing company financial problems",
+                                "B) Improving employee benefits and flexibility",
+                                "C) Reducing employee expenses",
+                                "D) Changing company policies negatively"
+                            ],
+                            correct: 1,
+                            explanation: "El mensaje principal es la mejora de los beneficios para empleados y mayor flexibilidad."
+                        },
+                        {
+                            question: "How does the company view these changes?",
+                            options: [
+                                "A) As temporary solutions",
+                                "B) As cost-cutting measures",
+                                "C) As proof of commitment to employees",
+                                "D) As minor adjustments"
+                            ],
+                            correct: 2,
+                            explanation: "La empresa presenta los cambios como reflejo de su compromiso con un ambiente laboral positivo."
+                        },
+                        {
+                            question: "What aspect of work-life balance is being addressed?",
+                            options: [
+                                "A) Vacation days",
+                                "B) Remote work options",
+                                "C) Flexible working hours",
+                                "D) Shorter workweeks"
+                            ],
+                            correct: 2,
+                            explanation: "Se menciona específicamente la introducción de horarios flexibles para promover el equilibrio."
+                        }
+                    ]
+                }
+            ],
+            scanning: [
+                {
+                    title: "Conference Registration Form",
+                    text: "International Marketing Summit 2024. Date: March 15-17, 2024. Location: Grand Hotel Convention Center, Chicago, IL. Registration Deadline: February 28, 2024. Early Bird Price: $450 (until January 31). Regular Price: $650. Student Discount: 40% off regular price. The conference includes: 3 days of sessions, networking lunch on all days, welcome reception on March 15 at 6 PM, closing dinner on March 17 at 7 PM, access to all workshop materials, and a certificate of attendance. Contact: info@marketingsummit.com or call (555) 123-4567. Hotel accommodation available at discounted rate of $120 per night (mention conference code MS2024).",
+                    questions: [
+                        {
+                            question: "When is the registration deadline?",
+                            options: [
+                                "A) January 31",
+                                "B) February 28",
+                                "C) March 15",
+                                "D) March 17"
+                            ],
+                            correct: 1,
+                            explanation: "La fecha límite de registro es February 28, 2024, como se indica claramente."
+                        },
+                        {
+                            question: "What is the early bird registration price?",
+                            options: [
+                                "A) $120",
+                                "B) $450",
+                                "C) $650",
+                                "D) $390"
+                            ],
+                            correct: 1,
+                            explanation: "El precio de registro anticipado (Early Bird) es $450 hasta el 31 de enero."
+                        },
+                        {
+                            question: "At what time is the closing dinner?",
+                            options: [
+                                "A) 6 PM on March 15",
+                                "B) 7 PM on March 15",
+                                "C) 6 PM on March 17",
+                                "D) 7 PM on March 17"
+                            ],
+                            correct: 3,
+                            explanation: "La cena de cierre es el 17 de marzo a las 7 PM, según se especifica en el texto."
+                        },
+                        {
+                            question: "How much is the hotel discount per night?",
+                            options: [
+                                "A) $450",
+                                "B) $650",
+                                "C) $120",
+                                "D) $40"
+                            ],
+                            correct: 2,
+                            explanation: "El precio con descuento del hotel es $120 por noche con el código MS2024."
+                        }
+                    ]
+                },
+                {
+                    title: "Product Recall Notice",
+                    text: "URGENT PRODUCT RECALL - BrightHome Kitchen Appliances is recalling model BH-2500 Electric Kettles manufactured between June 2023 and September 2023. Product Code: BH-2500-SS. Serial Numbers: 230600001 through 230900450. Reason: Potential overheating issue that may cause burns. Units Affected: Approximately 12,500. Action Required: Stop using immediately and unplug. Return to any BrightHome retail location or contact us at 1-800-555-0199 between 8 AM and 6 PM EST, Monday through Friday. Refund or Replacement: Full refund of $79.99 or free replacement with model BH-3000. No receipt required. Recall Initiated: November 1, 2023. For more information, visit www.brighthome.com/recall or email recall@brighthome.com.",
+                    questions: [
+                        {
+                            question: "What is the product code of the recalled item?",
+                            options: [
+                                "A) BH-3000",
+                                "B) BH-2500-SS",
+                                "C) 230600001",
+                                "D) 230900450"
+                            ],
+                            correct: 1,
+                            explanation: "El código del producto es BH-2500-SS, como se indica claramente en el aviso."
+                        },
+                        {
+                            question: "How many units are affected by this recall?",
+                            options: [
+                                "A) 2,500",
+                                "B) 6,000",
+                                "C) 12,500",
+                                "D) 79,999"
+                            ],
+                            correct: 2,
+                            explanation: "Aproximadamente 12,500 unidades están afectadas por el retiro del mercado."
+                        },
+                        {
+                            question: "What is the refund amount offered?",
+                            options: [
+                                "A) $55.99",
+                                "B) $79.99",
+                                "C) $89.99",
+                                "D) $99.99"
+                            ],
+                            correct: 1,
+                            explanation: "El reembolso completo ofrecido es de $79.99 según el texto."
+                        },
+                        {
+                            question: "What are the customer service hours?",
+                            options: [
+                                "A) 24 hours, 7 days",
+                                "B) 8 AM - 6 PM EST, Monday-Friday",
+                                "C) 9 AM - 5 PM EST, Monday-Friday",
+                                "D) 8 AM - 8 PM EST, every day"
+                            ],
+                            correct: 1,
+                            explanation: "El horario de atención es de 8 AM a 6 PM EST, de lunes a viernes."
+                        }
+                    ]
+                }
+            ]
+        };
+
+        let currentMode = 'skimming';
+        let currentReading = null;
+        let startTime = null;
+        let timerInterval = null;
+        let userAnswers = [];
+        let progressData = JSON.parse(localStorage.getItem('toeicProgress')) || {
+            completed: 0,
+            totalCorrect: 0,
+            totalQuestions: 0
+        };
+
+        function init() {
+            loadVocabulary();
+            updateProgress();
+            loadNewReading();
+        }
+
+        function changeMode() {
+            currentMode = document.getElementById('modeSelect').value;
+            loadNewReading();
+        }
+
+        function loadNewReading() {
+            const modeReadings = readings[currentMode];
+            currentReading = modeReadings[Math.floor(Math.random() * modeReadings.length)];
+            
+            document.getElementById('readingTitle').textContent = currentReading.title;
+            document.getElementById('readingContent').textContent = currentReading.text;
+            
+            resetInterface();
+        }
+
+        function resetInterface() {
+            document.getElementById('questionsSection').classList.add('hidden');
+            document.getElementById('statsSection').classList.add('hidden');
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('timer').textContent = '00:00';
+            userAnswers = [];
+        }
+
+        function startReading() {
+            startTime = Date.now();
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            if (!startTime) return;
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function stopReading() {
+            clearInterval(timerInterval);
+            
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const wordCount = currentReading.text.split(/\s+/).length;
+            const wpm = Math.round((wordCount / elapsed) * 60);
+            
+            document.getElementById('readingTime').textContent = 
+                `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')} min`;
+            document.getElementById('readingSpeed').textContent = `${wpm} palabras/min`;
+            
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('statsSection').classList.remove('hidden');
+            
+            showQuestions();
+        }
+
+        function showQuestions() {
+            const questionsSection = document.getElementById('questionsSection');
+            questionsSection.innerHTML = '<h3>📝 Preguntas de Comprensión</h3>';
+            
+            currentReading.questions.forEach((q, qIndex) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <div class="question-text">${qIndex + 1}. ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, oIndex) => `
+                            <div class="option" onclick="selectOption(${qIndex}, ${oIndex})">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="explanation hidden" id="explanation-${qIndex}"></div>
+                `;
+                questionsSection.appendChild(questionDiv);
+            });
+            
+            questionsSection.classList.remove('hidden');
+            document.getElementById('submitBtn').classList.remove('hidden');
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            const question = document.querySelectorAll('.question')[questionIndex];
+            const options = question.querySelectorAll('.option');
+            
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[optionIndex].classList.add('selected');
+            
+            userAnswers[questionIndex] = optionIndex;
+        }
+
+        function submitAnswers() {
+            let correct = 0;
+            
+            currentReading.questions.forEach((q, qIndex) => {
+                const question = document.querySelectorAll('.question')[qIndex];
+                const options = question.querySelectorAll('.option');
+                const explanationDiv = document.getElementById(`explanation-${qIndex}`);
+                
+                options.forEach((opt, oIndex) => {
+                    if (oIndex === q.correct) {
+                        opt.classList.add('correct');
+                    } else if (oIndex === userAnswers[qIndex]) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+                
+                if (userAnswers[qIndex] === q.correct) {
+                    correct++;
+                    explanationDiv.innerHTML = `✅ <strong>Correcto!</strong> ${q.explanation}`;
+                } else {
+                    explanationDiv.innerHTML = `❌ <strong>Incorrecto.</strong> ${q.explanation}`;
+                }
+                explanationDiv.classList.remove('hidden');
+            });
+            
+            const percentage = Math.round((correct / currentReading.questions.length) * 100);
+            document.getElementById('accuracy').textContent = 
+                `${correct}/${currentReading.questions.length} (${percentage}%)`;
+            
+            updateProgressData(correct, currentReading.questions.length);
+            document.getElementById('submitBtn').classList.add('hidden');
+        }
+
+        function updateProgressData(correct, total) {
+            progressData.completed++;
+            progressData.totalCorrect += correct;
+            progressData.totalQuestions += total;
+            
+            localStorage.setItem('toeicProgress', JSON.stringify(progressData));
+            updateProgress();
+        }
+
+        function updateProgress() {
+            document.getElementById('totalCompleted').textContent = progressData.completed;
+            
+            const avgAccuracy = progressData.totalQuestions > 0 
+                ? Math.round((progressData.totalCorrect / progressData.totalQuestions) * 100)
+                : 0;
+            document.getElementById('avgAccuracy').textContent = `${avgAccuracy}%`;
+        }
+
+        function newReading() {
+            loadNewReading();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = document.body.classList.contains('dark-mode') 
+                ? '☀️ Modo Claro' 
+                : '🌙 Modo Oscuro';
+        }
+
+        function addVocabulary() {
+            const input = document.getElementById('vocabInput');
+            const word = input.value.trim();
+            
+            if (!word) return;
+            
+            let vocabulary = JSON.parse(localStorage.getItem('toeicVocabulary')) || [];
+            
+            if (!vocabulary.includes(word)) {
+                vocabulary.push(word);
+                localStorage.setItem('toeicVocabulary', JSON.stringify(vocabulary));
+                loadVocabulary();
+            }
+            
+            input.value = '';
+        }
+
+        function loadVocabulary() {
+            const vocabulary = JSON.parse(localStorage.getItem('toeicVocabulary')) || [];
+            const vocabList = document.getElementById('vocabList');
+            
+            if (vocabulary.length === 0) {
+                vocabList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No hay palabras guardadas</p>';
+                return;
+            }
+            
+            vocabList.innerHTML = vocabulary.map((word, index) => `
+                <div class="vocab-item">
+                    <span class="vocab-word">${word}</span>
+                    <button class="delete-btn" onclick="deleteVocabulary(${index})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteVocabulary(index) {
+            let vocabulary = JSON.parse(localStorage.getItem('toeicVocabulary')) || [];
+            vocabulary.splice(index, 1);
+            localStorage.setItem('toeicVocabulary', JSON.stringify(vocabulary));
+            loadVocabulary();
+        }
+
+        document.getElementById('vocabInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addVocabulary();
+        });
+
+        init();
+    </script>
+</body>
+</html>
